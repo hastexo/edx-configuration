@@ -1,0 +1,37 @@
+---
+- name: stat cert
+  stat:
+    path: "{{ certbot_conf_dir }}/live/{{ certbot_cert.name }}/fullchain.pem"
+    get_checksum: yes
+    follow: yes
+  register: b2
+
+- name: stat backup cert
+  stat:
+    path: "{{ certbot_backup_dir }}/{{ certbot_cert.name }}.pem"
+    get_checksum: yes
+  register: b3
+
+- name: copy cert
+  copy:
+    src: "{{ certbot_conf_dir }}/live/{{ certbot_cert.name }}/fullchain.pem"
+    dest: "{{ certbot_backup_dir }}/{{ certbot_cert.name }}.pem"
+  when:
+    - b2.stat.exists is defined and b2.stat.exists
+    - b3.stat.exists is not defined or not b3.stat.exists or b3.stat.checksum != b2.stat.checksum
+
+- name: copy key
+  copy:
+    src: "{{ certbot_conf_dir }}/live/{{ certbot_cert.name }}/privkey.pem"
+    dest: "{{ certbot_backup_dir }}/{{ certbot_cert.name }}.key"
+  when:
+    - b2.stat.exists is defined and b2.stat.exists
+    - b3.stat.exists is not defined or not b3.stat.exists or b3.stat.checksum != b2.stat.checksum
+
+- name: git add cert and key
+  become: no
+  shell: >
+    cd {{ certbot_backup_dir }};
+    git add {{ certbot_cert.name }}.pem;
+    git add {{ certbot_cert.name }}.key;
+    exit 0

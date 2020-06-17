@@ -1,0 +1,18 @@
+---
+# Generate or update certificate, then deploy it
+
+- name: Deploy certbot nginx configuration
+  hosts: app_servers:app_master:analytics_servers
+  become: True
+  gather_facts: True
+  roles:
+    - certbot_deploy
+
+- name: Run certbot
+  hosts: localhost
+  become: True
+  gather_facts: True
+  roles:
+    - certbot
+
+- include: certbot-deploy.yml

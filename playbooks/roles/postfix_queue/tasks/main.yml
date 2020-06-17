@@ -26,6 +26,13 @@
     - "sender_canonical_maps = hash:{{ postfix_queue_sender_canonical_maps_file }}"
     - "header_checks = regexp:{{ postfix_queue_header_checks_file }}"
 
+- name: Configure postfix hostname
+  command: postconf -e '{{ item }}'
+  with_items:
+    - "myhostname = {{ POSTFIX_QUEUE_HOSTNAME }}"
+    - "myorigin = {{ POSTFIX_QUEUE_HOSTNAME }}"
+  when: POSTFIX_QUEUE_HOSTNAME is defined and POSTFIX_QUEUE_HOSTNAME != ''
+
 - name: Explain postfix authentication
   lineinfile:
     dest: "{{ postfix_queue_password_file }}"

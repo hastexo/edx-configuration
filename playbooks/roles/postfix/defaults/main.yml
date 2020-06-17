@@ -1,0 +1,3 @@
+---
+postfix_inet_interfaces: loopback-only
+postfix_smtp_use_tls: True

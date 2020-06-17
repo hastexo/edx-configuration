@@ -1,0 +1,14 @@
+---
+- name: clear existing dir
+  file:
+    state: absent
+    path: "{{ certbot_conf_dir }}/"
+
+- name: restore letsencrypt dir
+  shell: >
+    tar xzf {{ certbot_backup_file }} -C /
+
+- include: restore_loop.yml
+  with_items: "{{ certbot_certs }}"
+  loop_control:
+    loop_var: certbot_cert

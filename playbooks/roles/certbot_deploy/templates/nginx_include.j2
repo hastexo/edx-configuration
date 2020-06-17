@@ -1,0 +1,5 @@
+location {{ certbot_webroot_uri }} {
+  auth_basic off;
+  proxy_redirect off;
+  proxy_pass http://{{ certbot_webroot_host }};
+}

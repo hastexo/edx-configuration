@@ -1,0 +1,4 @@
+---
+dependencies:
+  - certbot_common
+  - common_vars

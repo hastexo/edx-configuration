@@ -1,0 +1,39 @@
+---
+- name: nginx pre include directory
+  file:
+    state: directory
+    path: "{{ COMMON_APP_DIR }}/nginx/include/{{ item }}-pre"
+    owner: root
+    group: "{{ common_web_group }}"
+  with_items: "{{ certbot_nginx_includes }}"
+
+- name: nginx pre include
+  template:
+    src: nginx_include_pre.j2
+    dest: "{{ COMMON_APP_DIR }}/nginx/include/{{ item }}-pre/certbot"
+    owner: root
+    group: "{{ common_web_group }}"
+  with_items: "{{ certbot_nginx_includes }}"
+  notify:
+    - reload nginx
+
+- name: nginx include directory
+  file:
+    state: directory
+    path: "{{ COMMON_APP_DIR }}/nginx/include/{{ item }}"
+    owner: root
+    group: "{{ common_web_group }}"
+  with_items: "{{ certbot_nginx_includes }}"
+
+- name: nginx include
+  template:
+    src: nginx_include.j2
+    dest: "{{ COMMON_APP_DIR }}/nginx/include/{{ item }}/certbot"
+    owner: root
+    group: "{{ common_web_group }}"
+  with_items: "{{ certbot_nginx_includes }}"
+  notify:
+    - reload nginx
+
+- include: deploy.yml
+  when: certbot_deploy

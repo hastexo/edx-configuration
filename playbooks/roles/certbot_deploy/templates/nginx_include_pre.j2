@@ -1,0 +1,3 @@
+if ($uri ~ {{ certbot_webroot_uri }}) {
+  set $do_redirect_to_https "false";
+}

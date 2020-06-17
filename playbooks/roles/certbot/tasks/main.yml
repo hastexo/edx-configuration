@@ -1,0 +1,84 @@
+---
+- name: add certbot ppa
+  apt_repository:
+    repo: "{{ certbot_repo }}"
+
+- name: install packages
+  apt:
+    name: "{{ item }}"
+    state: latest
+    update_cache: yes
+  with_items:
+    - nginx
+    - certbot
+
+- name: check if configuration exists
+  stat:
+    path: "{{ certbot_conf_dir }}"
+  register: c1
+
+- name: restore configuration
+  include_role:
+    name: certbot_common
+    tasks_from: restore
+  delegate_to: localhost
+  when:
+    - c1.stat.isdir is not defined or not c1.stat.isdir
+
+- name: check if configuration was restored
+  stat:
+    path: "{{ certbot_conf_dir }}"
+  register: c2
+
+- name: create registration details
+  shell: >
+    certbot register
+    --agree-tos
+    --email {{ certbot_email }}
+    --no-eff-email
+  when:
+    - c2.stat.isdir is not defined or not c2.stat.isdir
+
+- name: update registration details
+  shell: >
+    certbot register
+    --agree-tos
+    --update-registration
+    --email {{ certbot_email }}
+    --no-eff-email
+  when: 
+    - c2.stat.isdir is defined
+    - c2.stat.isdir
+
+- name: deploy hook dir
+  file:
+    path: "{{ certbot_deploy_hook_dir }}"
+    state: directory
+    recurse: yes
+
+- name: deploy hook
+  template:
+    src: certbot-deploy-hook.j2
+    dest: "{{ certbot_deploy_hook }}"
+    mode: 0775
+
+- name: service override dir
+  file:
+    path: /etc/systemd/system/certbot.service.d
+    state: absent
+  notify: reload certbot
+
+- include: generate_loop.yml
+  with_items: "{{ certbot_certs }}"
+  loop_control: 
+    loop_var: certbot_cert
+
+- name: fix permissions
+  include_role:
+    name: certbot_common
+    tasks_from: permissions
+
+- name: backup certs
+  include_role:
+    name: certbot_common
+    tasks_from: backup

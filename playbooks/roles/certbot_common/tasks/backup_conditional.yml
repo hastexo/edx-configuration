@@ -1,0 +1,23 @@
+---
+- name: archive letsencrypt dir
+  shell: >
+    tar czf {{ certbot_backup_file }} {{ certbot_conf_dir }}
+
+- name: git add letsencrypt file
+  become: no
+  shell: >
+    cd {{ certbot_backup_dir }};
+    git add letsencrypt.tar.gz;
+    exit 0
+
+- include: backup_loop.yml
+  with_items: "{{ certbot_certs }}"
+  loop_control:
+    loop_var: certbot_cert
+
+- name: commit changes
+  become: no
+  shell: >
+    cd {{ certbot_backup_dir }};
+    git commit --quiet --author="Letsencrypt <letsencrypt@hastexo.com>" --message="Auto letsencrypt backup";
+    exit 0

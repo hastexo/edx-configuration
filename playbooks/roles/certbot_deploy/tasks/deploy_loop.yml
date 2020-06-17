@@ -1,0 +1,26 @@
+---
+- name: stat cert
+  stat:
+    path: "{{ certbot_conf_dir }}/live/{{ certbot_cert.name }}/fullchain.pem"
+  register: c
+  delegate_to: localhost
+
+- name: deploy certificates
+  copy:
+    src: "{{ certbot_conf_dir }}/live/{{ certbot_cert.name }}/fullchain.pem"
+    dest: "/etc/ssl/certs/{{ certbot_cert.name }}.pem"
+    mode: 0644
+  notify:
+    - reload nginx
+  when:
+    - c.stat.exists is defined and c.stat.exists
+
+- name: deploy private key
+  copy:
+    src: "{{ certbot_conf_dir }}/live/{{ certbot_cert.name }}/privkey.pem"
+    dest: "/etc/ssl/private/{{ certbot_cert.name }}.key"
+    mode: 0640
+  notify:
+    - reload nginx
+  when:
+    - c.stat.exists is defined and c.stat.exists

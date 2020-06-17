@@ -1,0 +1,31 @@
+---
+  - name: ensure required packages are installed
+    apt:
+      name: "{{ item }}"
+      state: installed
+    with_items:
+      - postfix
+    tags: install
+
+  - name: configure postfix
+    template:
+      src: "main.cf.j2"
+      dest: "/etc/postfix/main.cf"
+    notify: restart postfix
+    tags: config
+
+  - name: set mailname
+    copy:
+      dest: /etc/mailname
+      content: "{{ ansible_fqdn }}"
+    notify: restart postfix
+    tags: config
+
+  - name: set email alias for root
+    lineinfile:
+      dest: /etc/aliases
+      line: "root: {{ postfix_root_alias }}"
+      regexp: "^root:"
+    notify: rebuild aliases
+    when: postfix_root_alias is defined
+    tags: config

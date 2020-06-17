@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -e
+
+PLAYBOOK_USER={{ certbot_playbook_user }}
+PLAYBOOK_DIR={{ certbot_playbook_dir }}
+ANSIBLE_BIN={{ edx_ansible_venv_bin }}
+
+sudo -Hu ${PLAYBOOK_USER} sh <<EOF
+cd ${PLAYBOOK_DIR}
+if [ -d "${ANSIBLE_BIN}" ]; then
+  . ${ANSIBLE_BIN}/activate
+  ${ANSIBLE_BIN}/ansible-playbook certbot-deploy-hook.yml
+else
+  ansible-playbook certbot-deploy-hook.yml
+fi
+EOF

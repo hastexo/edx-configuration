@@ -1,0 +1,14 @@
+---
+# Deploy and backup certs
+
+- include: certbot-deploy.yml
+
+- name: Backup certs
+  hosts: localhost
+  become: True
+  gather_facts: True
+  tasks:
+    - name: backup certs
+      include_role:
+        name: certbot_common
+        tasks_from: backup

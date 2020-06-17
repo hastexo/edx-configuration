@@ -1,0 +1,55 @@
+---
+# Example multi-node OpenStack deployment.
+
+- name: Configure backend servers
+  hosts: backend_servers
+  become: True
+  gather_facts: True
+  roles:
+    - common
+    - mongo_3_2
+    - elasticsearch
+    - { role: 'mariadb', MARIADB_CREATE_DBS: 'yes' }
+    - role: postfix
+      when: POSTFIX_QUEUE_EXTERNAL_SMTP_HOST is not defined or POSTFIX_QUEUE_EXTERNAL_SMTP_HOST == ''
+    - role: postfix_queue
+      when: POSTFIX_QUEUE_EXTERNAL_SMTP_HOST != ''
+    - memcache
+
+# RabbitMQ needs to be built serially
+- name: Configure RabbitMQ
+  hosts: backend_servers
+  become: True
+  gather_facts: True
+  serial: 1
+  roles:
+    - rabbitmq
+
+- name: Configure app servers
+  hosts: app_servers:tmp_app_servers:app_master
+  become: True
+  gather_facts: True
+  roles:
+    - supervisor
+    - role: nginx
+      nginx_sites:
+      - cms
+      - lms
+      nginx_default_sites:
+      - lms
+    - role: edxapp
+      celery_worker: True
+    - edxapp
+    - role: postfix
+      when: POSTFIX_QUEUE_EXTERNAL_SMTP_HOST is not defined or POSTFIX_QUEUE_EXTERNAL_SMTP_HOST == ''
+    - role: postfix_queue
+      when: POSTFIX_QUEUE_EXTERNAL_SMTP_HOST != ''
+    - guacd
+    - hastexo_xblock
+
+- name: Stop all services on app master
+  hosts: app_master
+  become: True
+  gather_facts: True
+  roles:
+    - stop_all_edx_services

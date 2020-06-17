@@ -1,0 +1,10 @@
+---
+- name: stat config dir
+  stat:
+    path: "{{ certbot_conf_dir }}"
+  register: b1
+
+- include: backup_conditional.yml
+  when:
+    - b1.stat.isdir is defined
+    - b1.stat.isdir

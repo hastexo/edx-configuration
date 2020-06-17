@@ -1,0 +1,10 @@
+---
+- name: restore cert
+  copy:
+    src: "{{ certbot_backup_dir }}/{{ certbot_cert.name }}.pem"
+    dest: "{{ certbot_conf_dir }}/live/{{ certbot_cert.name }}/fullchain.pem"
+
+- name: restore key
+  copy:
+    src: "{{ certbot_backup_dir }}/{{ certbot_cert.name }}.key"
+    dest: "{{ certbot_conf_dir }}/live/{{ certbot_cert.name }}/privkey.pem"

@@ -1,0 +1,13 @@
+---
+- name: check if backup exists
+  stat:
+    path: "{{ certbot_backup_file }}"
+  register: r
+
+- include: restore_conditional.yml
+  when:
+    - r.stat.exists is defined and r.stat.exists
+
+- include: permissions.yml
+  when:
+    - r.stat.exists is defined and r.stat.exists

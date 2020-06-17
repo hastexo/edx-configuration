@@ -15,6 +15,10 @@ POSTFIX_QUEUE_EXTERNAL_SMTP_PORT: 587
 POSTFIX_QUEUE_EXTERNAL_SMTP_USER: ''
 POSTFIX_QUEUE_EXTERNAL_SMTP_PASSWORD: ''
 
+# Set this to the desired hostname.  It will also be used for origin, and
+# hence, as the domain when sending HELO/EHLO.
+POSTFIX_QUEUE_HOSTNAME: ''
+
 # Set this to content of sender_canonical_maps postfix configuration file (optional).
 # Example:
 # POSTFIX_QUEUE_SENDER_CANONICAL_MAPS: |-

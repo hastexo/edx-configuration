@@ -1,0 +1,28 @@
+---
+- name: check if local configuration exists
+  stat:
+    path: "{{ certbot_conf_dir }}"
+  register: d1
+  delegate_to: localhost
+
+- name: restore configuration
+  include_role:
+    name: certbot_common
+    tasks_from: restore
+  delegate_to: localhost
+  when:
+    - d1.stat.isdir is not defined or not d1.stat.isdir
+
+- name: fix local configuration permissions
+  include_role:
+    name: certbot_common
+    tasks_from: permissions
+  delegate_to: localhost
+  when:
+    - d1.stat.isdir is defined
+    - d1.stat.isdir
+
+- include: deploy_loop.yml
+  with_items: "{{ certbot_certs }}"
+  loop_control:
+    loop_var: certbot_cert

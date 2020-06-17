@@ -1,0 +1,26 @@
+---
+- name: stat cert
+  stat:
+    path: "{{ certbot_conf_dir }}/live/{{ certbot_cert.name }}/fullchain.pem"
+  register: c
+
+- name: generate via webroot
+  shell: >
+    certbot certonly
+    --non-interactive
+    --webroot
+    --webroot-path "{{ certbot_webroot_path }}"
+    --cert-name "{{ certbot_cert.name }}"
+    --domains "{{ certbot_cert.domains|join(",") }}"
+  when:
+    - c.stat.exists is not defined or not c.stat.exists
+
+- name: renew via webroot
+  shell: >
+    certbot renew
+    --non-interactive 
+    --webroot
+    --webroot-path={{ certbot_webroot_path }}
+    --cert-name "{{ certbot_cert.name }}"
+  when:
+    - c.stat.exists is defined and c.stat.exists

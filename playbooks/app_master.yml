@@ -1,0 +1,20 @@
+---
+- name: Configure app servers
+  hosts: app_master
+  become: True
+  gather_facts: True
+  vars:
+    migrate_db: 'yes'
+  roles:
+    - { role: 'edxapp', celery_worker: True }
+    - edxapp
+    - hastexo_xblock
+
+- name: Stop all services on app master
+  hosts: app_master
+  become: True
+  gather_facts: True
+  roles:
+    - stop_all_edx_services
+
+- include: certbot.yml

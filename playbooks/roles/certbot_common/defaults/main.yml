@@ -1,0 +1,21 @@
+---
+certbot_repo: "ppa:certbot/certbot"
+certbot_webroot_uri: "/.well-known/acme-challenge/"
+certbot_webroot_host: "deploy"
+certbot_webroot_path: "/var/www/html"
+certbot_conf_dir: "/etc/letsencrypt"
+certbot_playbook_user: "ubuntu"
+certbot_playbook_home: "/home/{{ certbot_playbook_user }}"
+certbot_playbook_dir: "{{ certbot_playbook_home }}/edx-configuration/playbooks"
+certbot_backup_dir: "{{ certbot_playbook_home }}/edx-configuration-secrets/files"
+certbot_backup_file: "{{ certbot_backup_dir }}/letsencrypt.tar.gz"
+certbot_deploy_hook_dir: "{{ certbot_conf_dir }}/renewal-hooks/deploy"
+certbot_deploy_hook: "{{ certbot_deploy_hook_dir }}/hastexo"
+certbot_deploy: false
+certbot_email: ""
+certbot_certs: []
+certbot_nginx_includes:
+  - lms
+  - cms
+  - insights
+  - kibana

@@ -1,0 +1,43 @@
+- name: Configure instance(s)
+  hosts: localhost
+  become: True
+  gather_facts: True
+  vars:
+    migrate_db: 'yes'
+    devstack: true
+    edx_django_service_is_devstack: true
+    disable_edx_services: true
+    mongo_enable_journal: false
+    mongo_disable_transparent_hugepages: false
+    EDXAPP_NO_PREREQ_INSTALL: 0
+    COMMON_SSH_PASSWORD_AUTH: "yes"
+    EDXAPP_LMS_BASE: 127.0.0.1:8000
+    EDXAPP_PREVIEW_LMS_BASE: EDXAPP_LMS_BASE
+    EDXAPP_LOGIN_REDIRECT_WHITELIST: [ "{{ EDXAPP_CMS_BASE }}" ]
+    EDXAPP_OAUTH_ENFORCE_SECURE: false
+    EDXAPP_LMS_BASE_SCHEME: http
+    MONGO_AUTH: false
+    COMMON_SECURITY_UPDATES: true
+    SECURITY_UPGRADE_ON_ANSIBLE: true
+    DISCOVERY_URL_ROOT: 'http://localhost:{{ DISCOVERY_NGINX_PORT }}'
+    JOURNALS_ENABLED: false
+  vars_files:
+    - roles/edxapp/vars/devstack.yml
+  roles:
+    - common
+    - vhost
+    - edxlocal
+    - memcache
+    - mongo_3_2
+    - role: rabbitmq
+      rabbitmq_ip: 127.0.0.1
+    - edxapp
+    - elasticsearch
+    - forum
+    - discovery
+    - role: notifier
+      NOTIFIER_DIGEST_TASK_INTERVAL: "5"
+    - local_dev
+    - demo
+    - guacd
+    - hastexo_xblock
